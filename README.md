@@ -1,21 +1,21 @@
 # Home Library Service
 
-## Prerequisites
+# To start:
 
-- Git - [Download & Install Git](https://git-scm.com/downloads).
-- Node.js - [Download & Install Node.js](https://nodejs.org/en/download/) and the npm package manager.
+- clone this repository width branch `part1`
+  ```bash
+  git clone -b part1 <repository-url>
+- open app `cd nodejs2025Q2-service`
+- run `npm install` to install
+- `PORT=4000` set in .env file
+- npm start
 
-## Downloading
+# To run test:
+`npm run start`
+`npm run test`
 
-```
-git clone {repository URL}
-```
-
-## Installing NPM modules
-
-```
-npm install
-```
+# To see swagger doc:
+`http://localhost:{'your port'}/doc/`
 
 ## Running application
 
