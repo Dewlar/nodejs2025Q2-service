@@ -1,49 +1,65 @@
+version: '3.9'
+
 services:
-  app:
-    build:
-      context: .
-    container_name: home_library_app
-    ports:
-      - ${PORT}:${PORT}
-    depends_on:
-      - postgres
-    environment:
-      - PORT=${PORT}
-      - DATABASE_URL=${DATABASE_URL}
-    networks:
-      - home_library_network
-    volumes:
-      - ./:/app
-      - /app/node_modules
-    restart: always
-    command: sh -c "npx prisma migrate deploy && npm run start:dev"
-
   postgres:
-    image: postgres:18-alpine
-#    build:
-#      context: src/database/
-    container_name: home_library_postgres
+    image: postgres:16
+    container_name: prisma_postgres_16
     restart: always
-    environment:
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
     ports:
-      - '${POSTGRES_PORT}:${POSTGRES_PORT}'
-    healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
-      interval: 30s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-    networks:
-      - home_library_network
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: prisma_db
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
 
-volumes:
-  postgres_data:
-
-networks:
-  home_library_network:
-    driver: bridge
+#services:
+#  app:
+#    build:
+#      context: .
+#    container_name: home_library_app
+#    ports:
+#      - ${PORT}:${PORT}
+#    depends_on:
+#      - postgres
+#    environment:
+#      - PORT=${PORT}
+#      - DATABASE_URL=${DATABASE_URL}
+#    networks:
+#      - home_library_network
+#    volumes:
+#      - ./:/app
+#      - /app/node_modules
+#    restart: always
+#    command: sh -c "npx prisma migrate deploy && npm run start:dev"
+#
+#  postgres:
+#    image: postgres:18-alpine
+##    build:
+##      context: src/database/
+#    container_name: home_library_postgres
+#    restart: always
+#    environment:
+#      - POSTGRES_DB=${POSTGRES_DB}
+#      - POSTGRES_USER=${POSTGRES_USER}
+#      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+#    volumes:
+#      - postgres_data:/var/lib/postgresql/data
+#    ports:
+#      - '${POSTGRES_PORT}:${POSTGRES_PORT}'
+#    healthcheck:
+#      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
+#      interval: 30s
+#      timeout: 5s
+#      retries: 5
+#      start_period: 10s
+#    networks:
+#      - home_library_network
+#
+#volumes:
+#  postgres_data:
+#
+#networks:
+#  home_library_network:
+#    driver: bridge

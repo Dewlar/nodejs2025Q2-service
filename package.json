@@ -22,7 +22,26 @@
     "test:refresh": "cross-env TEST_MODE=auth jest --testPathPattern refresh.e2e.spec.ts --noStackTrace --runInBand",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
-    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand"
+    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
+
+    "prisma:migrate:dev": "docker compose exec app npx prisma migrate dev",
+    "migrate:start:dev": "prisma migrate deploy && nest start --watch",
+
+    "docker:up": "docker compose up",
+    "docker:up:build": "docker compose up --build",
+    "docker:up:detached": "docker compose up -d --build",
+    "docker:down": "docker compose down",
+    "docker:down:volumes": "docker compose down -v",
+    "docker:logs:app": "docker compose logs -f app",
+    "docker:logs:postgres": "docker compose logs -f postgres",
+    "docker:exec:app": "docker compose exec app sh",
+    "docker:exec:postgres": "docker compose exec postgres psql -U ${POSTGRES_USER} -d ${POSTGRES_DB}",
+
+    "prisma:migrate": "docker compose exec app npx prisma migrate deploy",
+    "prisma:studio": "docker compose exec app npx prisma studio",
+
+    "docker:tag": "docker tag home_library_app dewlar/home_library_app:latest",
+    "docker:push": "docker push dewlar/home_library_app:latest"
   },
   "dependencies": {
     "@nestjs/common": "^10.4.16",
