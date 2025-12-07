@@ -43,7 +43,13 @@ export class UserService {
       throw new NotFoundException('This user does not exist');
     }
 
-    return user;
+    const newUser = omit(user, ['password']);
+
+    return {
+      ...newUser,
+      createdAt: new Date(newUser.createdAt).getTime(),
+      updatedAt: new Date(newUser.updatedAt).getTime(),
+    };
   }
 
   async updateUserById(id: string, updateUserDto: UpdatePasswordDto) {
