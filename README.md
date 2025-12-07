@@ -2,17 +2,32 @@
 
 # To start:
 
-- clone this repository width branch `part1`
+- clone this repository width branch `part2`
   ```bash
-  git clone -b part1 <repository-url>
+  git clone -b part2 <repository-url>
 - open app `cd nodejs2025Q2-service`
+
+### First way to run a project (build image)
 - run `npm install` to install
 - `PORT=4000` set in .env file
-- npm start
+- `npm run docker:up:build`
+- ready use postman/etc
 
-# To run test:
-`npm run start`
+### Second way to run a project (download image)
+- download image (https://hub.docker.com/r/dewlar/home-library-app) or find it in dockerHub (dewlar/home-library-app)
+- `npm run docker:up`
+- ready use postman/etc
+
+#### u can run `npm run prisma:studio` script to view the database changes (http://localhost:5555/)
+
+### To run test:
 `npm run test`
+
+### npm script for vulnerabilities scanning
+- `npm run docker:scan:postgres`
+- `npm run docker:scan:app`
+- `npm run docker:scan`
+
 
 # To see swagger doc:
 `http://localhost:{'your port'}/doc/`
