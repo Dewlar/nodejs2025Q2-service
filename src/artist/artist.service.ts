@@ -1,81 +1,86 @@
-import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { v4 as uuidv4 } from 'uuid';
-import { db } from '../db/db';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { PrismaService } from '../db/prisma.service';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
 
+@Injectable()
 export class ArtistService {
-  getArtists() {
-    return db.artistsDb;
+  constructor(private readonly db: PrismaService) {}
+
+  async getArtists() {
+    const artist = await this.db.artist.findMany();
+    return artist;
   }
 
-  createArtist(artistDto: CreateArtistDto) {
+  async createArtist(artistDto: CreateArtistDto) {
     this.validateNameAndGrammy(artistDto);
 
-    const artistData = {
-      id: uuidv4(),
-      name: artistDto.name,
-      grammy: artistDto.grammy,
-    };
-
-    db.artistsDb.push(artistData);
-
-    return artistData;
-  }
-
-  getArtistById(id: string) {
-    return this.validateArtistId(id);
-  }
-
-  updateArtistById(id: string, updateArtistDto: UpdateArtistDto) {
-    this.validateArtistId(id);
-    this.validateUpdateArtist(updateArtistDto);
-
-    const index = db.artistsDb.findIndex((item) => item.id === id);
-    const artist = db.artistsDb.find((artist) => artist.id === id);
-    const newArtistData = {
-      ...artist,
-      name: updateArtistDto.name,
-      grammy: updateArtistDto.grammy,
-    };
-
-    try {
-      db.artistsDb[index] = newArtistData;
-      return db.artistsDb[index];
-    } catch (err) {
-      console.log(err);
-      return false;
-    }
-  }
-
-  deleteArtistById(id: string) {
-    this.validateArtistId(id);
-
-    const index = db.artistsDb.findIndex((item) => item.id === id);
-
-    if (index === -1) throw new NotFoundException('artist not found');
-
-    db.albumDb.forEach((album) => {
-      if (album.artistId === id) album.artistId = null;
+    const artist = await this.db.artist.create({
+      data: artistDto,
     });
 
-    db.trackDb.forEach((track) => {
-      if (track.artistId === id) track.artistId = null;
-    });
-
-    db.artistsDb.splice(index, 1);
-
-    return 'The record is found and deleted';
+    return artist;
   }
 
-  private validateArtistId(id: string) {
-    const artist = db.artistsDb.find((item) => item.id === id);
+  async getArtistById(id: string) {
+    const artist = await this.db.artist.findUnique({
+      where: { id },
+    });
 
     if (!artist) {
-      throw new NotFoundException('This artist is not exist');
+      throw new NotFoundException('This artist does not exist');
     }
 
     return artist;
+  }
+
+  async updateArtistById(id: string, updateArtistDto: UpdateArtistDto) {
+    const artist = await this.db.artist.findUnique({
+      where: { id },
+    });
+
+    if (!artist) {
+      throw new NotFoundException('This artist does not exist');
+    }
+
+    this.validateUpdateArtist(updateArtistDto);
+
+    const updatedArtist = await this.db.artist.update({
+      where: { id },
+      data: updateArtistDto,
+    });
+
+    return updatedArtist;
+  }
+
+  async deleteArtistById(id: string) {
+    const artist = await this.db.artist.findUnique({
+      where: { id },
+    });
+
+    if (!artist) {
+      throw new NotFoundException('This artist does not exist');
+    }
+
+    await this.db.album.updateMany({
+      where: { artistId: id },
+      data: { artistId: null },
+    });
+
+    await this.db.track.updateMany({
+      where: { artistId: id },
+      data: { artistId: null },
+    });
+
+    await this.db.artist.delete({
+      where: { id },
+    });
+
+    return 'The record is found and deleted';
   }
 
   private validateNameAndGrammy(createArtistDto: CreateArtistDto) {
