@@ -24,8 +24,14 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
 
-    "prisma:migrate:dev": "docker compose exec app npx prisma migrate dev",
-    "migrate:start:dev": "prisma migrate deploy && nest start --watch",
+    "prisma:generate": "npx prisma generate",
+    "prisma:migrate": "npx prisma migrate dev",
+    "prisma:deploy": "npx prisma migrate deploy",
+
+
+    "start:dev:migrate": "npx prisma migrate deploy && npm run start:dev",
+    "prisma:studio": "docker compose exec app npx prisma studio --port 5555 --browser none",
+
 
     "docker:up": "docker compose up",
     "docker:up:build": "docker compose up --build",
@@ -36,12 +42,16 @@
     "docker:logs:postgres": "docker compose logs -f postgres",
     "docker:exec:app": "docker compose exec app sh",
     "docker:exec:postgres": "docker compose exec postgres psql -U ${POSTGRES_USER} -d ${POSTGRES_DB}",
+    "docker:prisma:migrate:dev": "docker compose exec app npx prisma migrate dev",
+    "docker:prisma:migrate": "docker compose exec app npx prisma migrate deploy",
 
-    "prisma:migrate": "docker compose exec app npx prisma migrate deploy",
-    "prisma:studio": "docker compose exec app npx prisma studio",
 
-    "docker:tag": "docker tag home_library_app dewlar/home_library_app:latest",
-    "docker:push": "docker push dewlar/home_library_app:latest"
+    "docker:tag": "docker tag home-library-app dewlar/home-library-app:latest",
+    "docker:push": "docker push dewlar/home-library-app:latest",
+
+    "docker:scan": "docker scout cves postgres:18-alpine && docker scout cves dewlar/home-library-app:latest",
+    "docker:scan:postgres": "docker scout cves postgres:18-alpine",
+    "docker:scan:app": "docker scout cves dewlar/home-library-app:latest"
   },
   "dependencies": {
     "@nestjs/common": "^10.4.16",
@@ -51,6 +61,12 @@
     "@nestjs/mapped-types": "^2.1.0",
     "@nestjs/platform-express": "^10.4.15",
     "@nestjs/swagger": "^8.1.1",
+    "@nestjs/cli": "^10.4.9",
+    "@types/bcrypt": "^5.0.2",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.5",
+    "@types/node": "^20.11.24",
+    "@types/uuid": "^9.0.8",
     "@prisma/adapter-pg": "^7.1.0",
     "@prisma/client": "^7.1.0",
     "@types/js-yaml": "^4.0.9",
@@ -66,21 +82,18 @@
     "rimraf": "^5.0.5",
     "rxjs": "^7.8.1",
     "swagger-ui-express": "^5.0.1",
-    "uuid": "^9.0.1"
+    "uuid": "^9.0.1",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.3.3"
   },
   "devDependencies": {
-    "@nestjs/cli": "^10.4.9",
     "@nestjs/schematics": "^10.0.3",
     "@nestjs/testing": "^10.2.8",
-    "@types/bcrypt": "^5.0.2",
-    "@types/express": "^4.17.21",
     "@types/jest": "^29.5.12",
-    "@types/jsonwebtoken": "^9.0.5",
     "@types/lodash": "^4.17.21",
-    "@types/node": "^20.11.24",
     "@types/pg": "^8.15.6",
     "@types/supertest": "^6.0.2",
-    "@types/uuid": "^9.0.8",
     "@typescript-eslint/eslint-plugin": "^7.1.1",
     "@typescript-eslint/parser": "^7.1.1",
     "cross-env": "^7.0.3",
@@ -92,9 +105,6 @@
     "source-map-support": "^0.5.21",
     "supertest": "^6.3.4",
     "ts-jest": "^29.1.2",
-    "ts-loader": "^9.5.1",
-    "ts-node": "^10.9.2",
-    "tsconfig-paths": "^4.2.0",
-    "typescript": "^5.3.3"
+    "ts-loader": "^9.5.1"
   }
 }
