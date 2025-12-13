@@ -24,26 +24,31 @@ export class LoggerService extends ConsoleLogger {
 
   log(message: any) {
     if (!this.logLevels.includes('log')) return;
+    super.log(message);
     this.writeLogs('log', this.logMessage(message)).then();
   }
 
   error(message: any, stack?: any) {
     if (!this.logLevels.includes('error')) return;
+    super.error(message, stack);
     this.writeLogs('error', this.logMessage(message, stack)).then();
   }
 
   warn(message: any) {
     if (!this.logLevels.includes('warn')) return;
+    super.warn(message);
     this.writeLogs('warn', this.logMessage(message)).then();
   }
 
   debug(message: any) {
     if (!this.logLevels.includes('debug')) return;
+    super.debug(message);
     this.writeLogs('debug', this.logMessage(message)).then();
   }
 
   verbose(message: any) {
     if (!this.logLevels.includes('verbose')) return;
+    super.verbose(message);
     this.writeLogs('verbose', this.logMessage(message)).then();
   }
 
@@ -62,8 +67,6 @@ export class LoggerService extends ConsoleLogger {
   }
 
   private logMessage(message: string, stack?: any) {
-    super.log(message);
-
     let msg = `${new Date().toISOString()}: ${message}`;
 
     if (stack) {

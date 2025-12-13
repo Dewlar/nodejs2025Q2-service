@@ -2,10 +2,11 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as yaml from 'js-yaml';
-import { NestFactory } from '@nestjs/core';
+import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { SwaggerModule, OpenAPIObject } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { HttpExceptionFilter } from './filters/http-exception/http-exception.filter';
 import { LoggerService } from './logger/logger.service';
 
 async function bootstrap() {
@@ -17,6 +18,10 @@ async function bootstrap() {
 
   const logger = app.get(LoggerService);
   app.useLogger(logger);
+
+  const httpAdapterHost = app.get(HttpAdapterHost);
+  app.useGlobalFilters(new HttpExceptionFilter(httpAdapterHost));
+  // app.useGlobalFilters(app.get(HttpAdapterHost)); // use with `provide: APP_FILTER`
 
   app.useStaticAssets(
     path.join(__dirname, '..', 'node_modules', 'swagger-ui-dist'),
