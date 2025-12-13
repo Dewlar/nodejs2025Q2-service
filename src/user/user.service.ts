@@ -4,6 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
 import { omit } from 'lodash';
 import { PrismaService } from '../db/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -22,6 +23,10 @@ export class UserService {
     if (!(userDto.login && userDto.password)) {
       throw new BadRequestException('Invalid data');
     }
+    userDto.password = await bcrypt.hash(
+      userDto.password,
+      +process.env.CRYPT_SALT,
+    );
 
     const user = await this.db.user.create({ data: userDto });
 
@@ -69,17 +74,23 @@ export class UserService {
       throw new NotFoundException('This user does not exist');
     }
 
-    if (updateUserDto.oldPassword !== user.password) {
+    const checkPassword = await bcrypt.compare(
+      updateUserDto.oldPassword,
+      user.password,
+    );
+
+    if (!checkPassword) {
       throw new ForbiddenException('Old password is wrong');
     }
 
-    const version = user.version + 1;
     const updatedUser = await this.db.user.update({
-      where: { id },
+      where: { id: id },
       data: {
-        password: updateUserDto.newPassword,
-        version: version,
-        updatedAt: new Date(),
+        password: await bcrypt.hash(
+          updateUserDto.newPassword,
+          +process.env.CRYPT_SALT,
+        ),
+        version: { increment: 1 },
       },
     });
 
@@ -104,5 +115,17 @@ export class UserService {
     await this.db.user.delete({
       where: { id },
     });
+  }
+
+  async getByLogin(login: string) {
+    const user = await this.db.user.findFirst({
+      where: { login: login },
+    });
+
+    if (!user) {
+      throw new NotFoundException('This user does not exist');
+    }
+
+    return user;
   }
 }

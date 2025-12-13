@@ -12,6 +12,7 @@ import { LoggerMiddleware } from './logger/logger.middleware';
 import { TrackModule } from './track/track.module';
 import { UserModule } from './user/user.module';
 import { LoggerModule } from './logger/logger.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { LoggerModule } from './logger/logger.module';
     UserModule,
     PrismaModule,
     LoggerModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [
