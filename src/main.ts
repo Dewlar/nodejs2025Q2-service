@@ -6,11 +6,17 @@ import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { SwaggerModule, OpenAPIObject } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { LoggerService } from './logger/logger.service';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    // logger: new LoggerService(),
+  });
   const configService = app.get(ConfigService);
   const PORT = configService.get<number>('PORT') || 4000;
+
+  const logger = app.get(LoggerService);
+  app.useLogger(logger);
 
   app.useStaticAssets(
     path.join(__dirname, '..', 'node_modules', 'swagger-ui-dist'),
@@ -31,6 +37,9 @@ async function bootstrap() {
     ],
   });
 
-  await app.listen(PORT, () => console.log('App is running on the port', PORT));
+  await app.listen(PORT, () => {
+    logger.log(`App is running on the port ${PORT}`);
+    // console.log('App is running on the port', PORT);
+  });
 }
 bootstrap().then();

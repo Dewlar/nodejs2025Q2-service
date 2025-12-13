@@ -10,7 +10,7 @@ export class LoggerService extends ConsoleLogger {
   private countersMap: Map<LogLevel, number> = new Map();
 
   constructor() {
-    super();
+    super('loggerService');
     this.logLevelsInit();
     this.maxFileSize = +process.env.LOGGER_FILE_SIZE;
 

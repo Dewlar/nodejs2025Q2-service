@@ -4,10 +4,12 @@ import { LoggerService } from './logger.service';
 
 @Injectable()
 export class LoggerMiddleware implements NestMiddleware {
-  // standard logger - output to console
-  // private logger = new Logger(LoggerMiddleware.name);
-  // custom LoggerService - output in file and console
-  constructor(private readonly logger: LoggerService) {}
+  private logger = new Logger(LoggerMiddleware.name);
+  /**
+   * A custom logger service can be implemented via constructor injection.
+   * It doesn't require inclusion in main.ts.
+   */
+  // constructor(private readonly logger: LoggerService) {}
 
   use(request: Request, response: Response, next: NextFunction) {
     const { ip, method, originalUrl, query, body } = request;
