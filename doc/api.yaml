@@ -119,7 +119,7 @@ security:
   - bearerAuth: []
 
 paths:
-  /login:
+  /auth/login:
     post:
       tags:
         - Login
@@ -156,13 +156,48 @@ paths:
                 description: JWT Token
         403:
           description: Incorrect login or password
-  /signup:
+  /auth/signup:
     post:
       tags:
         - Signup
-      security: [ ]
+      security: []
       summary: Signup
       description: Signup a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              title: example
+              properties:
+                login:
+                  type: string
+                  minLength: 3
+                  maxLength: 255
+                  description: Username
+                password:
+                  type: string
+                  format: password
+                  pattern: ^[a-zA-Z0-9]{3,30}
+                  description: Password
+              required:
+                - login
+                - password
+      responses:
+        204:
+          description: Successful signup
+        400:
+          description: Bad request
+        409:
+          description: Conflict. Login already exists
+  /auth/refresh:
+    post:
+      tags:
+        - Refresh token
+      security: []
+      summary: Refresh
+      description: Refresh a token
       requestBody:
         required: true
         content:

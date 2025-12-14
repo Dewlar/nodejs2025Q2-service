@@ -2,9 +2,9 @@
 
 # To start:
 
-- clone this repository width branch `part2`
+- clone this repository width branch `part3`
   ```bash
-  git clone -b part2 <repository-url>
+  git clone -b part3 <repository-url>
 - open app `cd nodejs2025Q2-service`
 
 ### run project (build image)
@@ -17,7 +17,11 @@
 #### u can run `npm run prisma:studio` script to view the database changes (http://localhost:5555/)
 
 ### To run test:
-`npm run test`
+`npm run test:auth`
+`npm run test:refresh`
+
+
+
 
 ### npm script for vulnerabilities scanning
 - `npm run docker:scan:postgres`

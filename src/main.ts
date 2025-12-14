@@ -2,15 +2,29 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as yaml from 'js-yaml';
-import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
+import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { SwaggerModule, OpenAPIObject } from '@nestjs/swagger';
+import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
+import { HttpExceptionFilter } from './filters/http-exception/http-exception.filter';
+import { LoggerService } from './logger/logger.service';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    // logger: new LoggerService(),
+  });
   const configService = app.get(ConfigService);
   const PORT = configService.get<number>('PORT') || 4000;
+
+  const logger = app.get(LoggerService);
+  app.useLogger(logger);
+
+  app.useGlobalPipes(new ValidationPipe());
+
+  const httpAdapterHost = app.get(HttpAdapterHost);
+  app.useGlobalFilters(new HttpExceptionFilter(httpAdapterHost));
+  // app.useGlobalFilters(app.get(HttpAdapterHost)); // use with `provide: APP_FILTER`
 
   app.useStaticAssets(
     path.join(__dirname, '..', 'node_modules', 'swagger-ui-dist'),
@@ -31,6 +45,9 @@ async function bootstrap() {
     ],
   });
 
-  await app.listen(PORT, () => console.log('App is running on the port', PORT));
+  await app.listen(PORT, () => {
+    logger.log(`App is running on the port ${PORT}`);
+    // console.log('App is running on the port', PORT);
+  });
 }
 bootstrap().then();
