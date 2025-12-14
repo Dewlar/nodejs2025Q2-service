@@ -9,7 +9,7 @@
 
 ### run project (build image)
 - run `npm install` to install
-- run `npm run prisma:generate`
+- run `npm run prisma:generate` to generate prisma client
 - `PORT=4000` set in .env file
 - `npm run docker:up:build`
 - ready use postman/etc
