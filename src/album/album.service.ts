@@ -1,20 +1,27 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Injectable } from '@nestjs/common';
-import { v4 as uuidv4, validate } from 'uuid';
-import { db } from '../db/db';
+import { v4 as uuidv4 } from 'uuid';
+import { PrismaService } from '../db/prisma.service';
 import { CreateAlbumDto } from './dto/album.dto';
+import { UpdateAlbumDto } from './dto/update-album.dto';
 
 @Injectable()
 export class AlbumService {
-  getAlbums() {
-    return db.albumDb;
+  constructor(private readonly db: PrismaService) {}
+
+  async getAlbums() {
+    const album = await this.db.album.findMany();
+    return album;
   }
 
-  createAlbum(albumDto: CreateAlbumDto) {
+  async createAlbum(albumDto: CreateAlbumDto) {
     this.validateAlbumCreate(albumDto);
 
     const validatedArtistId =
-      albumDto.artistId && db.artistsDb.find((a) => a.id === albumDto.artistId)
+      albumDto.artistId &&
+      (await this.db.artist.findUnique({
+        where: { id: albumDto.artistId },
+      }))
         ? albumDto.artistId
         : null;
 
@@ -25,65 +32,70 @@ export class AlbumService {
       artistId: validatedArtistId,
     };
 
-    db.albumDb.push(albumData);
-
-    return albumData;
+    return this.db.album.create({ data: albumData });
   }
 
-  getAlbumById(id: string) {
-    return this.validateAlbumId(id);
-  }
-
-  updateAlbumById(id: string, updateAlbumDto: CreateAlbumDto) {
-    this.validateAlbumId(id);
-    this.validateAlbumCreate(updateAlbumDto);
-
-    const index = db.albumDb.findIndex((album) => album.id === id);
-    const album = db.albumDb[index];
-
-    const validatedArtistId =
-      updateAlbumDto.artistId &&
-      db.artistsDb.find((a) => a.id === updateAlbumDto.artistId)
-        ? updateAlbumDto.artistId
-        : null;
-
-    const newAlbumData = {
-      id: album.id,
-      name: updateAlbumDto.name || album.name,
-      year: updateAlbumDto.year || album.year,
-      artistId: validatedArtistId,
-    };
-
-    db.albumDb[index] = newAlbumData;
-
-    return db.albumDb[index];
-  }
-
-  deleteAlbumById(id: string) {
-    this.validateAlbumId(id);
-
-    const index = db.albumDb.findIndex((item) => item.id === id);
-
-    db.trackDb.forEach((track) => {
-      if (track.albumId === id) track.albumId = null;
+  async getAlbumById(id: string) {
+    const album = await this.db.album.findUnique({
+      where: { id },
     });
-    db.albumDb.splice(index, 1);
-
-    return null;
-  }
-
-  private validateAlbumId(id: string) {
-    if (!validate(id)) {
-      throw new BadRequestException('AlbumId is invalid (not uuid)');
-    }
-
-    const album = db.albumDb.find((item) => item.id === id);
 
     if (!album) {
       throw new NotFoundException('This album is not exist');
     }
 
     return album;
+  }
+
+  async updateAlbumById(id: string, updateAlbumDto: UpdateAlbumDto) {
+    this.validateAlbumCreate(updateAlbumDto);
+
+    const album = await this.db.album.findUnique({
+      where: { id },
+    });
+
+    if (!album) {
+      throw new NotFoundException('This album is not exist');
+    }
+
+    let validatedArtistId = null;
+    if (updateAlbumDto.artistId) {
+      const artist = await this.db.artist.findUnique({
+        where: { id: updateAlbumDto.artistId },
+      });
+
+      if (artist) {
+        validatedArtistId = updateAlbumDto.artistId;
+      }
+    }
+
+    const updatedAlbum = await this.db.album.update({
+      where: { id },
+      data: {
+        name: updateAlbumDto.name || album.name,
+        year: updateAlbumDto.year || album.year,
+        artistId: validatedArtistId,
+      },
+    });
+
+    return updatedAlbum;
+  }
+
+  async deleteAlbumById(id: string) {
+    const album = await this.db.album.findUnique({
+      where: { id },
+    });
+
+    if (!album) {
+      throw new NotFoundException('This album is not exist');
+    }
+
+    await this.db.track.updateMany({
+      where: { albumId: id },
+      data: { albumId: null },
+    });
+
+    return this.db.album.delete({ where: { id } });
   }
 
   private validateAlbumCreate(albumDto: CreateAlbumDto) {

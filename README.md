@@ -2,17 +2,28 @@
 
 # To start:
 
-- clone this repository width branch `part1`
+- clone this repository width branch `part2`
   ```bash
-  git clone -b part1 <repository-url>
+  git clone -b part2 <repository-url>
 - open app `cd nodejs2025Q2-service`
-- run `npm install` to install
-- `PORT=4000` set in .env file
-- npm start
 
-# To run test:
-`npm run start`
+### run project (build image)
+- run `npm install` to install
+- run `npm run prisma:generate` to generate prisma client
+- `PORT=4000` set in .env file
+- `npm run docker:up:build`
+- ready use postman/etc
+
+#### u can run `npm run prisma:studio` script to view the database changes (http://localhost:5555/)
+
+### To run test:
 `npm run test`
+
+### npm script for vulnerabilities scanning
+- `npm run docker:scan:postgres`
+- `npm run docker:scan:app`
+- `npm run docker:scan`
+
 
 # To see swagger doc:
 `http://localhost:{'your port'}/doc/`

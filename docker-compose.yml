@@ -1,0 +1,52 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: dewlar/home-library-app:latest
+    container_name: home_library_app
+    ports:
+      - ${PORT}:${PORT}
+      - "5555:5555"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - PORT=${PORT}
+      - DATABASE_URL=${DATABASE_URL}
+    networks:
+      - home_library_network
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    restart: always
+    command: sh -c "npx prisma migrate deploy && npm run start:dev"
+
+  postgres:
+    image: postgres:18-alpine
+    container_name: home_library_postgres
+#    build:
+#      context: src/db/
+    restart: always
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - '${POSTGRES_PORT}:${POSTGRES_PORT}'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
+      interval: 30s
+      timeout: 5s
+      retries: 5
+    networks:
+      - home_library_network
+
+volumes:
+  postgres_data:
+
+networks:
+  home_library_network:
+    driver: bridge
