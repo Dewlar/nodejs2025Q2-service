@@ -8,17 +8,17 @@
 - open app `cd nodejs2025Q2-service`
 
 ### run project (build image)
-- run `npm install` to install
-- run `npm run prisma:generate` to generate prisma client
 - `PORT=4000` set in .env file
+- `npm install` to install
+- `npm run prisma:generate` to generate prisma client
 - `npm run docker:up:build`
 - ready use postman/etc
 
 #### u can run `npm run prisma:studio` script to view the database changes (http://localhost:5555/)
 
 ### To run test:
-`npm run test:auth`
-`npm run test:refresh`
+- `npm run test:auth`
+- `npm run test:refresh`
 
 
 
